@@ -5,14 +5,14 @@ module Lib
 import Data.Fixed
 import Data.Time
 import Control.Applicative(liftA2)
+
+
+-- aliases
 type Amount = Centi
 type Dollars = Integer
 type Cents = Integer
 type Error = String
 
-
-x :: Centi
-x = MkFixed 1000
 
 -- The account type
 data Account = Account { acctno :: String
@@ -28,6 +28,26 @@ toAmount d c
   | d < 0 = Left "Dollars was less than zero."
   | c > 99 || c < 0 = Left "Cents was less than zero or more than 99."
   | otherwise = Right $ MkFixed (d * 100 + c) 
+
+-- Smart constructor for an Account
+toAccount :: String -> String -> Day -> Amount -> Either Error Account
+toAccount acctno name opendt bal
+  | acctno == "" = Left "Account Number Can't Be Blank."
+  | name   == "" = Left "Name Can't Be Blank."
+--  | opendt - check if it's in the past
+  | otherwise = Right (Account acctno name opendt bal)
+
+-- get Day from a UTCTime value. If we want to do this "inline" you can do like:
+--     `UTCTime day time <- getCurrentTime`.
+-- that'll bind the result of getCurrentTime to day/time via destructuring...
+-- 
+-- To apply this following function you'd do either:
+--     fmap getDayFromUTCTime getCurrentTime
+-- or
+--     getCurrentTime <$> getDayFromUTCTime
+--
+getDayFromUTCTime :: UTCTime -> Day
+getDayFromUTCTime (UTCTime day time) = day
   
 -- The Debit function 
 -- Create an account
@@ -61,3 +81,24 @@ someFunc :: IO ()
 someFunc = 
   putStrLn $ show $ liftA2 debit acct (toAmount 23 33)
 
+
+
+-------
+{-
+  Let's experiment: Get an IO String from console. Write a simple function to make
+  sure it's got at least 4 characters. If it does, return an Maybe Just String that says "Hi". If not
+  return a Nothing
+-}
+
+sayHello :: String -> IO ()
+sayHello name =
+  putStrLn ("Hi " ++ name ++ "!")
+
+isLongEnough :: String  -> String
+isLongEnough s
+  | length s > 4 = s
+  | otherwise = "error"
+
+test = do
+  out  <- isLongEnough <$> getLine
+  sayHello out
