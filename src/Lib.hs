@@ -1,5 +1,13 @@
 module Lib
-    ( someFunc
+    (
+      Amount,
+      Dollars,
+      Cents,
+      Error,
+      Account,
+      toAmount,
+      toAccount,
+      debit
     ) where
 
 import Data.Fixed
@@ -59,11 +67,11 @@ acct = Right Account { acctno = "8239322"
 debit :: Account -> Amount -> Account
 debit (Account a n o b) amt = Account a n o (b - amt)
 
-liftedDebit :: Either Error Account -> Either Error Amount -> Either Error Account
-liftedDebit eAcc eAm = debit <$> eAcc <*> eAm
+-- liftedDebit :: Either Error Account -> Either Error Amount -> Either Error Account
+-- liftedDebit eAcc eAm = debit <$> eAcc <*> eAm
 
-otherLiftedDebit :: Either Error Account -> Either Error Amount -> Either Error Account
-otherLiftedDebit = liftA2 debit
+-- otherLiftedDebit :: Either Error Account -> Either Error Amount -> Either Error Account
+-- otherLiftedDebit = liftA2 debit
 
 
 -- Executing --
@@ -79,27 +87,7 @@ debit takes an Either Error Account -> Amount  and returns an Either Error Accou
 someFunc :: IO ()
 someFunc = 
   putStrLn $ show $ liftA2 debit acct (toAmount 23 33)
+  -- we  could also do this as putStrLn $ show $ debit <$> acct <*> (toAmount 23 33)
 
-
-
--------
-{-
-  Let's experiment: Get an IO String from console. Write a simple function to make
-  sure it's got at least 4 characters. If it does, return an Maybe Just String that says "Hi".
-  If not return a Nothing.
--}
-
-sayHello :: String -> IO ()
-sayHello name =
-  putStrLn ("Hi " ++ name ++ "!")
-
-sayInteger :: Integer -> IO ()
-sayInteger number =
-  putStrLn ("Hi " ++ (show number) ++ "!")
-
-isLongEnough :: String  -> String
-isLongEnough s
-  | length s > 4 = s
-  | otherwise = "error"
 
 

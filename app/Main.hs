@@ -1,6 +1,6 @@
 module Main where
 
-import Lib
+import Date
 
 main :: IO ()
-main = someFunc
+main = runDateDemo

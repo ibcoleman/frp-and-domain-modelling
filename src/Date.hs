@@ -1,46 +1,31 @@
-module Date () where
+module Date
+  (
+    runDateDemo
+  ) where
 
+import System.IO
 import Data.Time
 import Control.Monad(join)
+import Control.Applicative(liftA2)
 import Text.Read(readMaybe)
+import Lib(toAccount, toAmount, Error)
 
+-- Use decomposition to get the Day from the UTCTime
 getDayFromUTCTime :: UTCTime -> Day
 getDayFromUTCTime (UTCTime day time) = day
 
+-- Return today's Day from the system clock.
 today :: IO Day
 today = getDayFromUTCTime <$> getCurrentTime
 
--- mkDay :: String -> String -> String -> Day
--- mkDay y m d = do
---   year  <- read y
---   month <- fromIntegral $ read $ m
---   day   <- fromIntegral $ read $ d
---   fromGregorian year month day
 
-getYear :: String -> Maybe Integer
-getYear yearStr = readMaybe yearStr
-
-getIntFromString :: String -> Maybe Int
-getIntFromString dayStr = readMaybe dayStr
-
--- Ok, ignore IO for a bit; let's new up a Maybe Day and another Maybe Day
--- Compare two Day values
--- Compare a Maybe Day value and a Day value
--- Compare two Maybe Day values
--- Compare an IO Day and a Maybe Day
+-- We use this function to go from a Maybe Day returned by Data.Time to a Either Error Day
+eitherDay :: Maybe a -> Either Error a
+eitherDay (Just a) = Right a
+eitherDay Nothing  = Left "That was not a valid day!"
 
 
-
--- This is the signature for chaining IO actions:
---     (>>) :: IO a -> IO b -> IO b
-
-
--- skunk = do
---   day  <- (fromGregorianValid 2018 10 23)
---  Here day is type Maybe Day
---  sayHello <$> show <$> day
-
-
+-- 
 test :: IO ()
 test = do
   putStr "Enter day: "
@@ -70,16 +55,20 @@ test = do
   outString   <- pure $ dayDiff
   print outString
   
-  
-testTwo :: IO ()
-testTwo = do
+
+-- This is what the main function calls.   
+runDateDemo :: IO ()
+runDateDemo = do
   putStr "Enter day: "
+  hFlush stdout
   day        <- readMaybe <$> getLine  --  Here Day 
   
   putStr "Enter month: "
+  hFlush stdout
   month      <- readMaybe <$> getLine
 
   putStr "Enter year: "
+  hFlush stdout
   year       <- readMaybe <$> getLine
 
   systemDay  <- pure <$> today      -- apply pure to the thing inside the context `(IO Day) -> IO (f Day)` later on this'll be `IO (Maybe Day)`
@@ -88,11 +77,8 @@ testTwo = do
     userDay    = join $ fromGregorianValid <$> year <*> month <*> day
     daysDiff   = diffDays <$> userDay <*> systemDay
     outString  = daysDiff
+    acct       = toAccount <$> (Right "8675309") <*> (Right "Ian Coleman") <*> (eitherDay userDay) <*> (toAmount 300 99) 
     
-  print outString
+  print acct
   
-  
-str2bool :: String -> Bool
-str2bool s = length s > 5
-
 
