@@ -77,7 +77,7 @@ runDateDemo = do
     userDay    = join $ fromGregorianValid <$> year <*> month <*> day
     daysDiff   = diffDays <$> userDay <*> systemDay
     outString  = daysDiff
-    acct       = toAccount <$> (Right "8675309") <*> (Right "Ian Coleman") <*> (eitherDay userDay) <*> (toAmount 300 99) 
+    acct       = join $ toAccount <$> (Right "8675309") <*> (Right "Ian Coleman") <*> (eitherDay userDay) <*> (toAmount 300 99) 
     
   print acct
   
