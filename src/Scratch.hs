@@ -3,6 +3,8 @@ module Scratch () where
 import GHC.Arr
 import qualified Data.Map.Strict as Map
 import Data.List.Split
+import Data.List(intersperse, dropWhileEnd, dropWhile)
+import Data.Char(isSpace)
 
 data BoolAndSomethingElse a =
   False' a | True' a deriving (Show, Eq)
@@ -65,22 +67,26 @@ letterDelim = " "
 mToChar :: String -> String
 mToChar str = morseStrings Map.! str
 
-decodeMorse :: String -> [String]
-decodeMorse morseStr = charsToWords chars
+decodeMorse :: String -> String
+decodeMorse morseStr = foldl (++) [] $ intersperse " " aWords
   where
-    words = splitOn wordDelim morseStr    -- [String]
-    chars = fmap (splitOn " ") words      -- [[String]]
-
+    mWords = splitOn wordDelim morseStr            -- [String]
+    chars = fmap (splitOn " " . trim) mWords      -- [[String]]
+    aWords = charsToWords chars
+    
+-- Recurseively convert 
 charsToWords :: [[String]] -> [String]
 charsToWords (morseStrings : xs)
   | xs == []    = mLettersToAWord morseStrings : []
   | otherwise   = mLettersToAWord morseStrings : charsToWords xs
 
+-- Convert an array of strings of Morse code letters to a word
 mLettersToAWord :: [String] -> String
 mLettersToAWord mLetters = foldl (++) [] $ fmap mToChar mLetters
     
 
-
+trim :: String -> String
+trim = dropWhileEnd isSpace . dropWhile isSpace
 
 {-
 ".- -... -.-.   .- -... -.-."
